@@ -81,6 +81,10 @@ def makeCowDisks(disk_paths):
         disks.append(disk)
     return disks
 
+def makeOutDisk(disk_path):
+    return IdeDisk(driveID="device0",
+                   image=RawDiskImage(read_only=False, image_file=disk_path))
+
 
 class MemBus(SystemXBar):
     badaddr_responder = BadAddr()
@@ -271,6 +275,8 @@ def makeX86System(mem_mode, numCPUs=1, mdesc=None, workload=None, Ruby=False):
 
     # Disks
     disks = makeCowDisks(mdesc.disks())
+    if args.out_disk:
+        disks.append(makeOutDisk(args.out_disk))
     self.pc.south_bridge.ide.disks = disks
 
     # Add in a Bios information structure.
@@ -600,6 +606,13 @@ parser.add_argument(
     type=str,
     default="",
     help="append to kernel command line",
+)
+parser.add_argument(
+    "--out-disk",
+    action="store",
+    type=str,
+    default="",
+    help="add disk for output files",
 )
 
 args = parser.parse_args()
